@@ -1,0 +1,71 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      ENGINE_REPO: DevAnthonyM/delft3d-community-build-releases
+      ENGINE_ZIP: Delft3D4-Community-Portable-DIMRset_2026.02-win64.zip
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build launcher (built-in .NET Framework C# compiler)
+        shell: cmd
+        run: build.bat none "%GITHUB_WORKSPACE%\out"
+
+      - name: Launcher checksum
+        shell: pwsh
+        run: |
+          $h = (Get-FileHash dist\Delft3D4Launcher.exe -Algorithm SHA256).Hash.ToLower()
+          "Delft3D4Launcher.exe SHA-256: ``$h``" >> $env:GITHUB_STEP_SUMMARY
+          $h
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Delft3D4Launcher
+          path: dist/Delft3D4Launcher.exe
+
+      # The installer needs the compiled Delft3D engines, published as a release asset in ENGINE_REPO.
+      # Skipped (not failed) until that release exists.
+      - name: Download engine package
+        id: engines
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download --repo $env:ENGINE_REPO --pattern $env:ENGINE_ZIP --dir engines
+          Expand-Archive "engines\$env:ENGINE_ZIP" -DestinationPath engines\pkg
+          $pkg = (Get-ChildItem engines\pkg -Directory | Select-Object -First 1).FullName
+          "pkg=$pkg" >> $env:GITHUB_OUTPUT
+
+      - name: Install Inno Setup
+        if: steps.engines.outcome == 'success'
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        if: steps.engines.outcome == 'success'
+        shell: cmd
+        run: build.bat "${{ steps.engines.outputs.pkg }}" "%GITHUB_WORKSPACE%\out"
+
+      - name: Installer checksum
+        if: steps.engines.outcome == 'success'
+        shell: pwsh
+        run: |
+          Get-ChildItem out\*.exe | ForEach-Object { "$($_.Name) SHA-256: ``$((Get-FileHash $_.FullName).Hash.ToLower())``" >> $env:GITHUB_STEP_SUMMARY }
+
+      - uses: actions/upload-artifact@v4
+        if: steps.engines.outcome == 'success'
+        with:
+          name: Delft3D4-Community-Setup
+          path: out/*.exe

@@ -1,0 +1,25 @@
+DELFT3D 4 COMMUNITY BUILD (UNOFFICIAL)
+
+This is an unofficial community build. It is NOT made, endorsed or supported by Deltares.
+"Delft3D" and "Deltares" are trademarks of Stichting Deltares.
+
+WHAT YOU ARE INSTALLING
+- Delft3D 4 computational engines (Delft3D-FLOW, WAVE, D-WAQ, PART), compiled unmodified
+  from the official open-source code: https://github.com/Deltares/Delft3D
+  Release DIMRset_2026.02, commit 5a4649830b1e5072caf019fb4850bbdefd9ad431.
+- Delft3D 4 Community Launcher: a small window to run your models (community code).
+- Intel Fortran/oneMKL/MPI and Microsoft Visual C++ runtime libraries the engines need.
+
+LICENSES (full texts are installed in the "licenses" folder)
+- Delft3D source code: GNU GPL-3.0, LGPL-2.1, AGPL-3.0 and BSD licences (per component).
+  You can get the complete source code at the link above.
+- Delft3D 4 Community Launcher: GNU GPL-3.0.
+- Intel runtime libraries: Intel's licence terms (licenses\intel).
+- Microsoft Visual C++ runtime: Microsoft Visual Studio redistribution terms.
+
+NO WARRANTY
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Check your model results; you use this software at your own risk.
+
+Help: https://delft3d-community.vercel.app
